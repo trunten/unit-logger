@@ -25,6 +25,7 @@ export async function POST(req:Request){
  const html='<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto"><h1>Unit Logger</h1><p>Use the button below to sign in. This link expires in 15 minutes and can only be used once.</p><p><a href="'+link.toString()+'" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:8px">Sign in to Unit Logger</a></p><p style="color:#666;font-size:13px">If you did not request this, you can ignore this email.</p></div>';
  const result=await new Resend(key).emails.send({from,to:email,subject:"Your Unit Logger sign-in link",html});
  if(result.error){
+  console.error("Resend magic-link send failed",{name:result.error.name,message:result.error.message});
   if(created){s.users=s.users.filter(x=>x.id!==u!.id);s.magicLinks=(s.magicLinks||[]).filter(x=>x.userId!==u!.id);await writeStore(s)}
   return NextResponse.json({error:"We couldn't send the sign-in email. Check your Resend setup."},{status:502});
  }
