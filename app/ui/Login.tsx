@@ -1,5 +1,77 @@
 "use client";
+
 import {useState} from "react";
-export default function Login(){const [mode,setMode]=useState<"login"|"setup"|"magic">("login");const [username,setUsername]=useState("");const [password,setPassword]=useState("");const [email,setEmail]=useState("");const [busy,setBusy]=useState(false);const [error,setError]=useState("");const [created,setCreated]=useState<{username:string,password:string}|null>(null);const [sent,setSent]=useState(false);
-async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);setError("");const url=mode==="login"?"/api/login":mode==="setup"?"/api/setup":"/api/magic/request";const body=mode==="magic"?{email}:{username,password,email};const r=await fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok){setError(d.error||"Something went wrong");setBusy(false);return}if(mode==="setup"){setCreated(d);setBusy(false);return}if(mode==="magic"){setSent(true);setBusy(false);return}location.reload()}
-return <main className="auth"><div className="card authCard"><div className="brandMark">UL</div><p className="eyebrow">PRIVATE • SIMPLE • SYNCED</p><h1>Unit Logger</h1><p className="muted">A calm way to keep track of your daily drinking units.</p>{created?<div className="credentials"><h2>Account created</h2><p>Save these somewhere safe. The password cannot be recovered.</p><label>Username<input id="created-username" name="username" autoComplete="username" readOnly value={created.username}/></label><label>Password<input id="created-password" name="password" type="password" autoComplete="new-password" readOnly value={created.password}/></label><button onClick={()=>{setCreated(null);setMode("login");setUsername(created.username);setPassword(created.password)}}>Continue to sign in</button></div>:sent?<div className="credentials"><h2>Check your email</h2><p>We've sent a sign-in link to your email. If this is your first time, your Unit Logger account has been created automatically. The link expires in 15 minutes.</p><button onClick={()=>setSent(false)}>Back</button></div>:<form onSubmit={submit} method="post">{mode==="magic"?<label htmlFor="email">Email<input id="email" name="email" type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label>:<><label htmlFor="username">Username<input id="username" name="username" autoComplete="username" value={username} onChange={e=>setUsername(e.target.value)} required/></label><label htmlFor="password">Password<input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>{mode==="setup"&&<label htmlFor="setup-email">Email (optional)<input id="setup-email" name="email" type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)}/></label>}</>}{error&&<p className="error">{error}</p>}<button type="submit" disabled={busy}>{busy?"Working…":mode==="magic"?"Email me a sign-in link":mode==="setup"?"Create account":"Sign in"}</button>{mode==="login"&&<button type="button" className="linkButton" onClick={()=>{setMode("magic");setError("")}}>Sign in with email link</button>}<button type="button" className="linkButton" onClick={()=>{setMode(mode==="setup"?"login":"setup");setError("");setSent(false)}}>{mode==="setup"?"Back to sign in":"Create a new account"}</button></form>}</div></main>
+
+type Mode="login"|"setup"|"magic";
+
+export default function Login(){
+  const [mode,setMode]=useState<Mode>("login");
+  const [username,setUsername]=useState("");
+  const [password,setPassword]=useState("");
+  const [email,setEmail]=useState("");
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState("");
+  const [created,setCreated]=useState<{username:string,password:string}|null>(null);
+  const [sent,setSent]=useState(false);
+
+  async function submit(e:React.FormEvent){
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    const url=mode==="login"?"/api/login":mode==="setup"?"/api/setup":"/api/magic/request";
+    const body=mode==="magic"?{email}:{username,password,email};
+    const r=await fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){setError(d.error||"Something went wrong");setBusy(false);return}
+    if(mode==="setup"){setCreated(d);setBusy(false);return}
+    if(mode==="magic"){setSent(true);setBusy(false);return}
+    location.reload();
+  }
+
+  return (
+    <main className="auth">
+      <div className="card authCard">
+        <div className="brandMark">UL</div>
+        <p className="eyebrow">PRIVATE • SIMPLE • SYNCED</p>
+        <h1>Unit Logger</h1>
+        <p className="muted">A calm way to keep track of your daily drinking units.</p>
+
+        {created ? (
+          <div className="credentials">
+            <h2>Account created</h2>
+            <p>Save these somewhere safe. The password cannot be recovered.</p>
+            <label>Username<input id="created-username" name="username" autoComplete="username" readOnly value={created.username}/></label>
+            <label>Password<input id="created-password" name="password" type="password" autoComplete="new-password" readOnly value={created.password}/></label>
+            <button onClick={()=>{setCreated(null);setMode("login");setUsername(created.username);setPassword(created.password)}}>Continue to sign in</button>
+          </div>
+        ) : sent ? (
+          <div className="credentials">
+            <h2>Check your email</h2>
+            <p>We've sent a sign-in link to your email. If this is your first time, your Unit Logger account has been created automatically. The link expires in 15 minutes.</p>
+            <button onClick={()=>setSent(false)}>Back</button>
+          </div>
+        ) : (
+          <form onSubmit={submit} method="post">
+            {mode==="magic" ? (
+              <label htmlFor="email">Email<input id="email" name="email" type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label>
+            ) : (
+              <>
+                <label htmlFor="username">Username<input id="username" name="username" autoComplete="username" value={username} onChange={e=>setUsername(e.target.value)} required/></label>
+                <label htmlFor="password">Password<input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>
+                {mode==="setup" && <label htmlFor="setup-email">Email (optional)<input id="setup-email" name="email" type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)}/></label>}
+              </>
+            )}
+
+            {error && <p className="error">{error}</p>}
+            <button type="submit" disabled={busy}>{busy?"Working…":mode==="magic"?"Email me a sign-in link":mode==="setup"?"Create account":"Sign in"}</button>
+
+            {mode==="login" && <button type="button" className="linkButton" onClick={()=>{setMode("magic");setError("")}}>Sign in with email link</button>}
+            <button type="button" className="linkButton" onClick={()=>{setMode(mode==="setup"?"login":"setup");setError("");setSent(false)}}>
+              {mode==="setup"?"Back to sign in":"Create a new account"}
+            </button>
+          </form>
+        )}
+      </div>
+    </main>
+  );
+}
