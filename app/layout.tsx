@@ -20,8 +20,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         variables: {
           colorPrimary: "#b9f26b",
           colorBackground: "#13221d",
-          colorInputBackground: "#0d1916",
-          colorInputText: "#edf6f1",
           borderRadius: "13px",
           fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         },
