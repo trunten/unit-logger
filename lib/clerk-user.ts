@@ -1,7 +1,5 @@
-import {clerkClient} from "@clerk/nextjs/server";
-import {readStore,writeStore} from "./store";
-import {getCurrentSessionUserId} from "./session";
-
+import { clerkClient,auth } from "@clerk/nextjs/server";
+import { readStore,writeStore } from "./store";
 export async function getOrCreateUser(clerkId:string){
  const client=await clerkClient(); const cu=await client.users.getUser(clerkId);
  const email=cu.emailAddresses.find(e=>e.id===cu.primaryEmailAddressId)?.emailAddress?.toLowerCase();
@@ -11,11 +9,4 @@ export async function getOrCreateUser(clerkId:string){
  else if(u.clerkId!==clerkId || (email && u.email!==email)){u.clerkId=clerkId;if(email)u.email=email;await writeStore(s)}
  return {id:u.id,username:u.username,email:u.email,clerkId};
 }
-
-export async function getCurrentUser(){
- const userId=await getCurrentSessionUserId();
- if(!userId)return null;
- const s=await readStore();
- const u=s.users.find(x=>x.id===userId);
- return u?{id:u.id,username:u.username,email:u.email,clerkId:u.clerkId}:null;
-}
+export async function getCurrentUser(){const {userId}=await auth();return userId?getOrCreateUser(userId):null}
