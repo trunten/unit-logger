@@ -15,7 +15,7 @@ export async function getCurrentSessionUserId(){
   const session=s.sessions?.find(x=>x.tokenHash===hashValue);
   if(!session)return null;
   if(session.expiresAt<=Date.now()){
-    s.sessions=s.sessions?.filter(x=>x.tokenHash!==hashValue);
+    s.sessions=(s.sessions||[]).filter(x=>x.tokenHash!==hashValue);
     await writeStore(s);
     return null;
   }
@@ -26,8 +26,9 @@ export async function createSession(userId:string){
   const token=randomBytes(32).toString("base64url");
   const s=await readStore();
   const now=Date.now();
-  s.sessions=(s.sessions||[]).filter(x=>x.expiresAt>now);
-  s.sessions.push({tokenHash:hash(token),userId,expiresAt:now+MAX_AGE*1000});
+  const sessions=(s.sessions||[]).filter(x=>x.expiresAt>now);
+  sessions.push({tokenHash:hash(token),userId,expiresAt:now+MAX_AGE*1000});
+  s.sessions=sessions;
   await writeStore(s);
   (await cookies()).set(COOKIE,token,{httpOnly:true,secure:true,sameSite:"lax",path:"/",maxAge:MAX_AGE});
 }
