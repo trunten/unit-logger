@@ -13,11 +13,6 @@ export default function Login() {
           A calm way to keep track of your daily drinking units.
         </p>
         <div className="credentials">
-          <h2>Welcome</h2>
-          <p>
-            Sign in securely with your email or one of the sign-in methods
-            enabled for this app.
-          </p>
           <SignInButton mode="modal">
             <button>Sign in</button>
           </SignInButton>
